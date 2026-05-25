@@ -1,0 +1,2 @@
+[console_scripts]
+litmus = litmus.cli.main:cli

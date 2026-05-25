@@ -1,0 +1,125 @@
+Metadata-Version: 2.4
+Name: litmus-validate
+Version: 0.1.0
+Summary: Behavioral control validation for cloud environments, mapped to OSCAL
+License: Apache-2.0
+Project-URL: Homepage, https://github.com/paulshep/litmus
+Project-URL: Repository, https://github.com/paulshep/litmus
+Project-URL: Issues, https://github.com/paulshep/litmus/issues
+Keywords: security,compliance,oscal,aws,cedar,nist
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: System Administrators
+Classifier: Topic :: Security
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: boto3>=1.34
+Requires-Dist: click>=8.1
+Requires-Dist: pyyaml>=6.0
+Requires-Dist: rich>=13.0
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.23; extra == "dev"
+Requires-Dist: moto[iam,s3]>=5.0; extra == "dev"
+Requires-Dist: ruff>=0.4; extra == "dev"
+Requires-Dist: mypy>=1.10; extra == "dev"
+
+# Litmus
+
+> Behavioral control validation for cloud environments, mapped to OSCAL.
+
+## The Problem
+
+Most compliance tooling checks whether a policy or configuration *exists*. Litmus asks a harder question: **does your environment actually behave the way your controls require?**
+
+A Cedar policy can exist and still not be attached to the right resource. An IAM boundary can be documented and still be bypassed. Config rules can pass and still miss the real attack surface.
+
+**Existence ≠ enforcement.**
+
+## What Litmus Does
+
+Litmus probes your live environment with behavioral test cases derived from security controls, observes the actual outcomes, and maps results to OSCAL Assessment Results — producing audit-ready evidence that your controls work, not just that they exist.
+
+```
+OSCAL Control Definition
+        ↓
+Behavioral Test Spec
+"A principal without role X MUST be denied action Y on resource Z"
+        ↓
+Live Environment Probe
+Fires real or simulated actions against your environment
+        ↓
+Behavioral Observation
+Records actual allow / deny / response
+        ↓
+OSCAL Assessment Result
+Machine-readable evidence mapped to control satisfaction
+```
+
+## Key Principles
+
+- **Behavior over existence** — test what the environment does, not what it says
+- **Implementation agnostic** — works regardless of whether you use Cedar, IAM, SCPs, or ABAC
+- **Continuous** — run on a schedule to detect control drift the moment it happens
+- **Evidence-first** — every test produces OSCAL-structured audit artifacts
+- **Extensible** — control library and probe targets are pluggable
+
+## Supported Environments
+
+| Environment | Status |
+|---|---|
+| AWS (IAM, S3, Cedar/AVP) | 🚧 In progress |
+| Azure | 📋 Planned |
+| GCP | 📋 Planned |
+
+## Supported Control Frameworks
+
+| Framework | Family | Status |
+|---|---|---|
+| NIST 800-53 Rev 5 | AC (Access Control) | 🚧 In progress |
+| NIST 800-53 Rev 5 | All others | 📋 Planned |
+| CIS Controls | — | 📋 Planned |
+| ISO 27001 | — | 📋 Planned |
+
+## Quickstart
+
+```bash
+pip install litmus-validate
+
+# Run behavioral tests against your AWS environment
+litmus run --controls nist-800-53/ac-3 --env aws --output oscal
+
+# Continuous mode
+litmus watch --controls nist-800-53/ac --interval 3600
+```
+
+## Project Structure
+
+```
+litmus/
+├── litmus/
+│   ├── controls/          # Control definitions and behavioral test specs
+│   │   └── nist_800_53/
+│   │       └── ac/        # Access Control family
+│   ├── probes/            # Environment-specific probe implementations
+│   │   └── aws/
+│   ├── engine/            # Test execution and orchestration
+│   ├── emitter/           # OSCAL Assessment Result generation
+│   └── cli/               # Command line interface
+├── tests/
+├── docs/
+└── examples/
+```
+
+## Contributing
+
+Litmus is open source and community-driven. The control library is a content problem as much as an engineering one — contributions mapping controls to behavioral test specs are as valuable as code contributions.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## License
+
+Apache 2.0
